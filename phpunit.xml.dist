@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2016 - 2020 Itspire.
+  ~ This software is licensed under the BSD-3-Clause license. (see LICENSE.md for full license)
+  ~ All Right Reserved.
+  -->
+
+<phpunit backupGlobals="false" backupStaticAttributes="false" colors="true" convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true" convertWarningsToExceptions="true" processIsolation="false"
+         stopOnFailure="false" bootstrap="src/test/php/bootstrap.php">
+
+    <testsuites>
+        <testsuite name="Itspire Monolog Loki Test Suite">
+            <directory>src/test/php</directory>
+        </testsuite>
+    </testsuites>
+
+    <logging>
+        <log type="coverage-html" target="build/coverage" lowUpperBound="35" highLowerBound="70" />
+        <log type="coverage-text" target="php://stdout" showOnlySummary="true" />
+    </logging>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">src/main/php</directory>
+        </whitelist>
+    </filter>
+
+    <php>
+        <env name="SYMFONY_PHPUNIT_VERSION" value="9.1" />
+        <env name="LOKI_ENTRYPOINT" value="http://loki:3100/" />
+        <ini name="date.timezone" value="UTC"/>
+    </php>
+</phpunit>

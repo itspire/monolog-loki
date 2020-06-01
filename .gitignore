@@ -1,0 +1,8 @@
+# Managed by Composer
+/vendor/
+
+# PHPUnit
+/phpunit.xml
+
+# Build data
+/build/
