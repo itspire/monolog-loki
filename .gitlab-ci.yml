@@ -1,3 +1,8 @@
+############################################################
+# Copyright (c) 2016 - 2020 Itspire.
+# This software is the proprietary information of Itspire.
+# All Right Reserved.
+############################################################
 variables:
   source_dir: src/main/php
   test_dir: src/test/php

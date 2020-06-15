@@ -1,3 +1,8 @@
+############################################################
+# Copyright (c) 2016 - 2020 Itspire.
+# This software is the proprietary information of Itspire.
+# All Right Reserved.
+############################################################
 src/main/test export-ignore
 /.gitattributes export-ignore
 /.gitignore export-ignore
