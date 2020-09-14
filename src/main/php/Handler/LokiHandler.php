@@ -67,12 +67,11 @@ class LokiHandler extends AbstractProcessingHandler
             }
 
             $record = $this->processRecord($record);
-
             $rows[] = $this->getFormatter()->format($record);
         }
 
         $this->sendPacket(['streams' => $rows]);
-}
+    }
 
     /** @throws \JsonException */
     private function sendPacket(array $packet): void
