@@ -62,8 +62,12 @@ class LokiHandler extends AbstractProcessingHandler
     {
         $rows = [];
         foreach ($records as $record) {
+            if (!$this->isHandling($record)) {
+                continue;
+            }
+
             $record = $this->processRecord($record);
-            $rows[] = $record;
+            $rows[] = $this->getFormatter()->format($record);
         }
 
         $this->sendPacket(['streams' => $rows]);
