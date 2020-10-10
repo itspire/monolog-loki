@@ -2,7 +2,7 @@
   "name": "itspire/monolog-loki",
   "type": "library",
   "description": "Monolog handler for Grafana Loki",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "minimum-stability": "dev",
   "prefer-stable": true,
   "authors": [
