@@ -1,4 +1,4 @@
-# Itspire - Monolog Loki [![build status](https://gitlab.itspire.fr/itspire/monolog-loki/badges/development/pipeline.svg)](https://gitlab.itspire.fr/itspire/monolog-loki/pipelines)
+# Itspire - Monolog Loki
 
 This library follows the PSR-12 convention.
 
@@ -36,7 +36,7 @@ $handler = new WhatFailureGroupHandler(
 );
 ```
 
-## Symfony App
+## Symfony App
 
 ### Configure LokiHandler Service
 ```yaml
@@ -110,4 +110,3 @@ For each time you ran the tests, you should see a log entry looking like the fol
     ]
 }
 ```
-
