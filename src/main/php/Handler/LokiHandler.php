@@ -81,36 +81,40 @@ class LokiHandler extends AbstractProcessingHandler
     {
         $payload = json_encode($packet, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $url = sprintf('%s/loki/api/v1/push', $this->entrypoint);
-        $curlOptions = [
-            CURLOPT_CONNECTTIMEOUT_MS => 100,
-            CURLOPT_TIMEOUT_MS => 200,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => $payload,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($payload),
-            ],
-        ];
-        if (!empty($this->basicAuth)) {
-            $curlOptions[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
-            $curlOptions[CURLOPT_USERPWD] = implode(':', $this->basicAuth);
-        }
-
-        if (!$this->connection) {
+        if (null === $this->connection) {
             $this->connection = curl_init($url);
 
             if (!$this->connection) {
                 throw new \LogicException('Unable to connect to ' . $url);
             }
         }
-        curl_setopt_array($this->connection, $curlOptions);
 
-        // Should Loki not be available yet,
-        // too many retries attempts cause some processes to hang,
-        // awaiting retries results so we limit to one attempt.
-        // Note :  Loki is a network related logging system ! It should not be the only logging system relied on.
-        Curl\Util::execute($this->connection, 1, false);
+        if (!$this->connection) {
+            $curlOptions = [
+                CURLOPT_CONNECTTIMEOUT_MS => 100,
+                CURLOPT_TIMEOUT_MS => 200,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POSTFIELDS => $payload,
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'Content-Length: ' . strlen($payload),
+                ],
+            ];
+
+            if (!empty($this->basicAuth)) {
+                $curlOptions[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
+                $curlOptions[CURLOPT_USERPWD] = implode(':', $this->basicAuth);
+            }
+
+            curl_setopt_array($this->connection, $curlOptions);
+
+            // Should Loki not be available yet,
+            // too many retries attempts cause some processes to hang,
+            // awaiting retries results so we limit to one attempt.
+            // Note :  Loki is a network related logging system ! It should not be the only logging system relied on.
+            Curl\Util::execute($this->connection, 1, false);
+        }
     }
 
     protected function getDefaultFormatter(): FormatterInterface
