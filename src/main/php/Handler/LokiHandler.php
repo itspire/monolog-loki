@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * Copyright (c) 2016 - 2020 Itspire.
  * This software is licensed under the BSD-3-Clause license. (see LICENSE.md for full license)
  * All Right Reserved.
@@ -78,24 +78,29 @@ class LokiHandler extends AbstractProcessingHandler
     {
         $payload = json_encode($packet, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $url = sprintf('%s/loki/api/v1/push', $this->entrypoint);
-        $ch = curl_init($url);
-        if (!empty($this->basicAuth)) {
-            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-            curl_setopt($ch, CURLOPT_USERPWD, implode(':', $this->basicAuth));
-        }
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt(
-            $ch,
-            CURLOPT_HTTPHEADER,
-            [
+        $curlOptions = [
+            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $payload,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
                 'Content-Length: ' . strlen($payload),
-            ]
-        );
+            ],
+        ];
+        if (!empty($this->basicAuth)) {
+            $curlOptions[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
+            $curlOptions[CURLOPT_USERPWD] = implode(':', $this->basicAuth);
+        }
 
-        Curl\Util::execute($ch);
+        $ch = curl_init($url);
+        curl_setopt_array($ch, $curlOptions);
+
+        // Should Loki not be available yet,
+        // too many retries attempts cause some processes to hang,
+        // awaiting retries results so we limit to one attempt.
+        // Note :  Loki is a network related logging system ! It should not be the only logging system relied on.
+        Curl\Util::execute($ch, 1);
     }
 
     protected function getDefaultFormatter(): FormatterInterface

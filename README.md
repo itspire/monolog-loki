@@ -67,28 +67,28 @@ monolog:
       type:   whatfailuregroup
       members: [loki]
       level: debug
-      process_psr_3_messages: true # optionnal but we find it rather useful (Note : native handler required to use)
+      process_psr_3_messages: true # optional but we find it rather useful (Note : native handler required to use)
 ```
 
 # Testing
 In order to test using the provided docker-compose file, you'll need an up-to-date docker/docker-compose installation
-You can start the lokie container by navigating to src/main/test/docker and running 
+You can start the Loki container by navigating to src/main/test/docker and running 
 ```shell script
 docker-compose up
 ```
 
-If you're testing from a local php installation, you'll need to retrieve the loki container ip with :
+If you're testing from a local php installation, you'll need to retrieve the Loki container ip with :
 ```shell script
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' itspire-monolog-loki_loki_1
 ```
 
-If you're testing from containerized php, you'll need to start the container with an extra host named loki 
+If you're testing from containerized php, you'll need to start the container with an extra host named Loki 
 mapped to your current host ip, using the following option :
 ```shell script
 --add-host loki:{your_host_ip}
 ```
 
-Run the test using phpunit and you can verify that posting to loki works
+Run the test using phpunit and you can verify that posting to Loki works
 by running the following from your host terminal : 
 ```shell script
 curl -G -s  "http://localhost:3100/loki/api/v1/query" --data-urlencode 'query={channel="test"}' | jq

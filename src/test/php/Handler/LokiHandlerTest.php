@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * Copyright (c) 2016 - 2020 Itspire.
  * This software is licensed under the BSD-3-Clause license. (see LICENSE.md for full license)
  * All Right Reserved.
@@ -31,11 +31,13 @@ class LokiHandlerTest extends TestCase
                 ],
             ]
         );
+
         static::assertInstanceOf(LokiHandler::class, $handler);
+
         try {
             $handler->handle($record);
         } catch (\RuntimeException $e) {
-            static::markTestSkipped('Could not connect to loki server on ' . getenv('LOKI_ENTRYPOINT'));
+            static::markTestSkipped('Could not connect to Loki server on ' . getenv('LOKI_ENTRYPOINT'));
         }
     }
 

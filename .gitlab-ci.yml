@@ -1,7 +1,7 @@
 ############################################################
 # Copyright (c) 2016 - 2020 Itspire.
-# This software is the proprietary information of Itspire.
-# All Right Reserved.
+# This software is licensed under the BSD-3-Clause license. (see LICENSE.md for full license)
+# All rights reserved.
 ############################################################
 variables:
   source_dir: src/main/php
@@ -9,8 +9,8 @@ variables:
   build_dir: build
   vendor_dir: vendor
   bin_dir: $vendor_dir/bin
-  PHP_IMAGE: registry.itspire.fr/devops/docker-webservers/php-fpm-dev:latest
-  COMPOSER_IMAGE: registry.itspire.fr/itspire-devops/webservers/composer-ci:latest
+  PHP_IMAGE: $CI_REGISTRY/devops/docker-webservers/php-fpm-dev:latest
+  COMPOSER_IMAGE: $CI_REGISTRY/itspire-devops/webservers/composer-ci:latest
   PHPCS_ARGS: --report=full --report-checkstyle=$build_dir/logs/checkstyle.xml --standard=PSR12 --extensions=php --ignore=bootstrap.php $source_dir $test_dir
   PHPCPD_ARGS: --log-pmd $build_dir/logs/pmd-cpd.xml $source_dir
   PHPLOC_ARGS: --count-tests --log-xml=$build_dir/logs/phploc.xml --exclude=bootstrap.php $source_dir $test_dir
