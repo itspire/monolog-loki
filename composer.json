@@ -15,7 +15,7 @@
     "issues": "https://github.com/itspire/monolog-loki/issues"
   },
   "require": {
-    "php": "~7.4",
+    "php": ">=7.4",
     "monolog/monolog": "~1.25"
   },
   "require-dev": {
