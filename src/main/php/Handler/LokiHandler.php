@@ -33,6 +33,9 @@ class LokiHandler extends AbstractProcessingHandler
     /** the list of default labels to be sent to the Loki system */
     protected array $globalLabels = [];
 
+    /** @return false|null|resource */
+    private $connection;
+
     public function __construct(array $apiConfig, $level = Logger::DEBUG, $bubble = true)
     {
         if (!function_exists('json_encode')) {
@@ -79,7 +82,8 @@ class LokiHandler extends AbstractProcessingHandler
         $payload = json_encode($packet, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $url = sprintf('%s/loki/api/v1/push', $this->entrypoint);
         $curlOptions = [
-            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_CONNECTTIMEOUT_MS => 100,
+            CURLOPT_TIMEOUT_MS => 200,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => $payload,
             CURLOPT_RETURNTRANSFER => true,
@@ -93,14 +97,20 @@ class LokiHandler extends AbstractProcessingHandler
             $curlOptions[CURLOPT_USERPWD] = implode(':', $this->basicAuth);
         }
 
-        $ch = curl_init($url);
-        curl_setopt_array($ch, $curlOptions);
+        if (!$this->connection) {
+            $this->connection = curl_init($url);
+
+            if (!$this->connection) {
+                throw new \LogicException('Unable to connect to ' . $url);
+            }
+        }
+        curl_setopt_array($this->connection, $curlOptions);
 
         // Should Loki not be available yet,
         // too many retries attempts cause some processes to hang,
         // awaiting retries results so we limit to one attempt.
         // Note :  Loki is a network related logging system ! It should not be the only logging system relied on.
-        Curl\Util::execute($ch, 1);
+        Curl\Util::execute($this->connection, 1, false);
     }
 
     protected function getDefaultFormatter(): FormatterInterface
