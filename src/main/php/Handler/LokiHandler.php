@@ -89,7 +89,7 @@ class LokiHandler extends AbstractProcessingHandler
             }
         }
 
-        if (!$this->connection) {
+        if (false !== $this->connection) {
             $curlOptions = [
                 CURLOPT_CONNECTTIMEOUT_MS => 100,
                 CURLOPT_TIMEOUT_MS => 200,
