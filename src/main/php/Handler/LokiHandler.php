@@ -33,6 +33,9 @@ class LokiHandler extends AbstractProcessingHandler
     /** the list of default labels to be sent to the Loki system */
     protected array $globalLabels = [];
 
+    /** custom curl options */
+    protected array $customCurlOptions = [];
+
     /** @return false|null|resource */
     private $connection;
 
@@ -46,6 +49,7 @@ class LokiHandler extends AbstractProcessingHandler
         $this->globalContext = $apiConfig['context'] ?? [];
         $this->globalLabels = $apiConfig['labels'] ?? [];
         $this->systemName = $apiConfig['client_name'] ?? null;
+        $this->customCurlOptions = $apiConfig['curl_options'] ?? [];
         if (isset($apiConfig['auth']['basic'])) {
             $this->basicAuth = (2 === count($apiConfig['auth']['basic'])) ? $apiConfig['auth']['basic'] : [];
         }
@@ -90,7 +94,7 @@ class LokiHandler extends AbstractProcessingHandler
         }
 
         if (false !== $this->connection) {
-            $curlOptions = [
+            $curlOptions = array_merge([
                 CURLOPT_CONNECTTIMEOUT_MS => 100,
                 CURLOPT_TIMEOUT_MS => 200,
                 CURLOPT_CUSTOMREQUEST => 'POST',
@@ -100,7 +104,7 @@ class LokiHandler extends AbstractProcessingHandler
                     'Content-Type: application/json',
                     'Content-Length: ' . strlen($payload),
                 ],
-            ];
+            ], $this->customCurlOptions);
 
             if (!empty($this->basicAuth)) {
                 $curlOptions[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
