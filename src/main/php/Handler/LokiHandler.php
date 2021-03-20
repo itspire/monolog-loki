@@ -94,7 +94,7 @@ class LokiHandler extends AbstractProcessingHandler
         }
 
         if (false !== $this->connection) {
-            $curlOptions = $this->customCurlOptions + [
+            $curlOptions = array_replace([
                 CURLOPT_CONNECTTIMEOUT_MS => 100,
                 CURLOPT_TIMEOUT_MS => 200,
                 CURLOPT_CUSTOMREQUEST => 'POST',
@@ -104,7 +104,7 @@ class LokiHandler extends AbstractProcessingHandler
                     'Content-Type: application/json',
                     'Content-Length: ' . strlen($payload),
                 ],
-            ];
+            ], $this->customCurlOptions);
 
             if (!empty($this->basicAuth)) {
                 $curlOptions[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
