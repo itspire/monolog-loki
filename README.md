@@ -58,6 +58,9 @@ $handler = new WhatFailureGroupHandler(
           basic:
             user: username
             password: password
+        curl_options:
+          !php/const CURLOPT_CONNECTTIMEOUT_MS: 500,
+          !php/const CURLOPT_TIMEOUT_MS: 600
 ```
 Note : 
 We're currently working on a possible bundle based implementation for Symfony but at the moment, this is the way.
