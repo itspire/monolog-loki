@@ -16,7 +16,7 @@
   },
   "require": {
     "php": ">=7.4",
-    "monolog/monolog": "^2.0"
+    "monolog/monolog": "^1.25"
   },
   "require-dev": {
     "ext-json": "*",
