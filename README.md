@@ -74,7 +74,7 @@ monolog:
 
 ### Add Loki to config/logging.php
 
-```
+```php
 'loki' => [
     'driver'         => 'monolog',
     'level'          => 'debug',
