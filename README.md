@@ -55,7 +55,6 @@ We're currently working on a possible bundle based implementation for Symfony bu
 
 
 ### Configure Monolog to use Loki Handler
-
 ```yaml
 monolog:
   handlers:
@@ -73,7 +72,6 @@ monolog:
 ## Laravel App
 
 ### Add Loki to config/logging.php
-
 ```php
 'loki' => [
     'driver'         => 'monolog',
@@ -105,7 +103,6 @@ monolog:
 ```
 
 ### Set env vars
-
 ```
 LOKI_ENTRYPOINT="http://loki:3100"
 LOKI_AUTH_BASIC_USER=
@@ -115,10 +112,7 @@ LOKI_LABELS="${APP_NAME}"
 LOKI_CONTEXT_PREFIX="context_"
 LOKI_EXTRA_PREFIX=
 ```
-
 These vars can be injected by Kubernetes, Docker or simply by setting them on the .env file
-
-
 
 # Testing
 In order to test using the provided docker-compose file, you'll need an up-to-date docker/docker-compose installation
