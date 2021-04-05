@@ -55,7 +55,6 @@ We're currently working on a possible bundle based implementation for Symfony bu
 
 
 ### Configure Monolog to use Loki Handler
-
 ```yaml
 monolog:
   handlers:
@@ -69,6 +68,51 @@ monolog:
       level: debug
       process_psr_3_messages: true # optional but we find it rather useful (Note : native handler required to use)
 ```
+
+## Laravel App
+
+### Add Loki to config/logging.php
+```php
+'loki' => [
+    'driver'         => 'monolog',
+    'level'          => 'debug',
+    'handler'        => \Itspire\MonologLoki\Handler\LokiHandler::class,
+    'formatter'      => \Itspire\MonologLoki\Handler\LokiFormatter::class,
+    'formatter_with' => [
+        'labels' => env('LOKI_LABELS', ''),
+        'context' => [],
+        'systemName' => env('LOKI_SYSTEM_NAME', null),
+        'extraPrefix' => env('LOKI_EXTRA_PREFIX', ''),
+        'contextPrefix' => env('LOKI_CONTEXT_PREFIX', '')
+    ],
+    'handler_with'   => [
+        'apiConfig'  => [
+            'entrypoint'  => env('LOKI_ENTRYPOINT', "http://localhost:3100"),
+            'context'     => [],
+            'labels'      => [],
+            'client_name' => '',
+            'auth' => [
+                'basic' => [
+                    env('LOKI_AUTH_BASIC_USER', ''), 
+                    env('LOKI_AUTH_BASIC_PASSWORD', '')
+                ],
+            ],
+        ],
+    ],
+],
+```
+
+### Set env vars
+```
+LOKI_ENTRYPOINT="http://loki:3100"
+LOKI_AUTH_BASIC_USER=
+LOKI_AUTH_BASIC_PASSWORD=
+LOKI_SYSTEM_NAME=null
+LOKI_LABELS="${APP_NAME}"
+LOKI_CONTEXT_PREFIX="context_"
+LOKI_EXTRA_PREFIX=
+```
+These vars can be injected by Kubernetes, Docker or simply by setting them on the .env file
 
 # Testing
 In order to test using the provided docker-compose file, you'll need an up-to-date docker/docker-compose installation
