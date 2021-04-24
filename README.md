@@ -41,6 +41,14 @@ $handler = new WhatFailureGroupHandler(
 );
 ```
 
+### Non-customizable curl options
+The following options are not customizable in the configuration:
+
+- `CURLOPT_CUSTOMREQUEST`
+- `CURLOPT_RETURNTRANSFER`
+- `CURLOPT_POSTFIELDS`
+- `CURLOPT_HTTPHEADER`
+
 ## Symfony App
 
 ### Configure LokiHandler Service

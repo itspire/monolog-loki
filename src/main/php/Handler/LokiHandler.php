@@ -36,6 +36,14 @@ class LokiHandler extends AbstractProcessingHandler
     /** custom curl options */
     protected array $customCurlOptions = [];
 
+    /** curl options which cannot be customized */
+    protected array $nonCustomizableCurlOptions = [
+        CURLOPT_CUSTOMREQUEST,
+        CURLOPT_RETURNTRANSFER,
+        CURLOPT_POSTFIELDS,
+        CURLOPT_HTTPHEADER,
+    ];
+
     /** @return false|null|resource */
     private $connection;
 
@@ -49,10 +57,19 @@ class LokiHandler extends AbstractProcessingHandler
         $this->globalContext = $apiConfig['context'] ?? [];
         $this->globalLabels = $apiConfig['labels'] ?? [];
         $this->systemName = $apiConfig['client_name'] ?? null;
-        $this->customCurlOptions = $apiConfig['curl_options'] ?? [];
+        $this->customCurlOptions = $this->determineValidCustomCurlOptions($apiConfig['curl_options'] ?? []);
         if (isset($apiConfig['auth']['basic'])) {
             $this->basicAuth = (2 === count($apiConfig['auth']['basic'])) ? $apiConfig['auth']['basic'] : [];
         }
+    }
+
+    private function determineValidCustomCurlOptions(array $configuredCurlOptions): array
+    {
+        foreach ($this->nonCustomizableCurlOptions as $option) {
+            unset($configuredCurlOptions[$option]);
+        }
+
+        return $configuredCurlOptions;
     }
 
     private function getEntrypoint(string $entrypoint): string
