@@ -33,6 +33,17 @@ class LokiHandler extends AbstractProcessingHandler
     /** the list of default labels to be sent to the Loki system */
     protected array $globalLabels = [];
 
+    /** custom curl options */
+    protected array $customCurlOptions = [];
+
+    /** curl options which cannot be customized */
+    protected array $nonCustomizableCurlOptions = [
+        CURLOPT_CUSTOMREQUEST,
+        CURLOPT_RETURNTRANSFER,
+        CURLOPT_POSTFIELDS,
+        CURLOPT_HTTPHEADER,
+    ];
+
     /** @return false|null|resource */
     private $connection;
 
@@ -46,9 +57,19 @@ class LokiHandler extends AbstractProcessingHandler
         $this->globalContext = $apiConfig['context'] ?? [];
         $this->globalLabels = $apiConfig['labels'] ?? [];
         $this->systemName = $apiConfig['client_name'] ?? null;
+        $this->customCurlOptions = $this->determineValidCustomCurlOptions($apiConfig['curl_options'] ?? []);
         if (isset($apiConfig['auth']['basic'])) {
             $this->basicAuth = (2 === count($apiConfig['auth']['basic'])) ? $apiConfig['auth']['basic'] : [];
         }
+    }
+
+    private function determineValidCustomCurlOptions(array $configuredCurlOptions): array
+    {
+        foreach ($this->nonCustomizableCurlOptions as $option) {
+            unset($configuredCurlOptions[$option]);
+        }
+
+        return $configuredCurlOptions;
     }
 
     private function getEntrypoint(string $entrypoint): string
@@ -90,17 +111,20 @@ class LokiHandler extends AbstractProcessingHandler
         }
 
         if (false !== $this->connection) {
-            $curlOptions = [
-                CURLOPT_CONNECTTIMEOUT_MS => 100,
-                CURLOPT_TIMEOUT_MS => 200,
-                CURLOPT_CUSTOMREQUEST => 'POST',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_POSTFIELDS => $payload,
-                CURLOPT_HTTPHEADER => [
-                    'Content-Type: application/json',
-                    'Content-Length: ' . strlen($payload),
+            $curlOptions = array_replace(
+                [
+                    CURLOPT_CONNECTTIMEOUT_MS => 100,
+                    CURLOPT_TIMEOUT_MS => 200,
+                    CURLOPT_CUSTOMREQUEST => 'POST',
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_POSTFIELDS => $payload,
+                    CURLOPT_HTTPHEADER => [
+                        'Content-Type: application/json',
+                        'Content-Length: ' . strlen($payload),
+                    ],
                 ],
-            ];
+                $this->customCurlOptions
+            );
 
             if (!empty($this->basicAuth)) {
                 $curlOptions[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;

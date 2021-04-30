@@ -30,11 +30,24 @@ $handler = new WhatFailureGroupHandler(
                 'auth' => [
                     'basic' => ['user', 'password'],
                 ],
+                // Optional : Override the default curl options with custom values
+                'curl_options' => [
+                    CURLOPT_CONNECTTIMEOUT_MS => 500,
+                    CURLOPT_TIMEOUT_MS => 600
+                ]
             ]
         )
     ]
 );
 ```
+
+### Non-customizable curl options
+The following options are not customizable in the configuration:
+
+- `CURLOPT_CUSTOMREQUEST`
+- `CURLOPT_RETURNTRANSFER`
+- `CURLOPT_POSTFIELDS`
+- `CURLOPT_HTTPHEADER`
 
 ## Symfony App
 
@@ -49,6 +62,13 @@ $handler = new WhatFailureGroupHandler(
         labels:
           env: '%env(APP_ENV)%'
         client_name: my_app_server
+        auth:
+          basic:
+            user: username
+            password: password
+        curl_options:
+          !php/const CURLOPT_CONNECTTIMEOUT_MS: 500,
+          !php/const CURLOPT_TIMEOUT_MS: 600
 ```
 Note : 
 We're currently working on a possible bundle based implementation for Symfony but at the moment, this is the way.
