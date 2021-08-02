@@ -97,7 +97,7 @@ monolog:
     'driver'         => 'monolog',
     'level'          => 'debug',
     'handler'        => \Itspire\MonologLoki\Handler\LokiHandler::class,
-    'formatter'      => \Itspire\MonologLoki\Handler\LokiFormatter::class,
+    'formatter'      => \Itspire\MonologLoki\Formatter\LokiFormatter::class,
     'formatter_with' => [
         'labels' => env('LOKI_LABELS', ''),
         'context' => [],
