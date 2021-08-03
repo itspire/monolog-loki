@@ -134,6 +134,63 @@ LOKI_EXTRA_PREFIX=
 ```
 These vars can be injected by Kubernetes, Docker or simply by setting them on the .env file
 
+### Laravel with WhatFailureGroupHandler
+Since Loki log handling uses a remote server, logging is prone to be subject of timeout, network shortage and so on. To avoid your application being broken in such a case, we recommend wrapping the handler in a WhatFailureGroupHandler. 
+
+Create a custom Log handler and wrap the `LokiHandler` with a `WhatFailureGroupHandler`.
+```php
+namespace App\Logging;
+
+use Itspire\MonologLoki\Formatter\LokiFormatter;
+use Itspire\MonologLoki\Handler\LokiHandler;
+use Monolog\Handler\WhatFailureGroupHandler;
+use Monolog\Logger;
+
+class LokiNoFailureHandler
+{
+    public function __invoke(array $config)
+    {
+        return new Logger('loki-no-failure', [
+            new WhatFailureGroupHandler([
+                (new LokiHandler($config['handler_with']['apiConfig']))
+                    ->setFormatter(new LokiFormatter(...array_values($config['formatter_with'])))
+            ])
+        ]);
+    }
+}
+
+```
+Update the config accordingly: 
+
+```php
+'loki' => [
+    'driver'    => 'custom',
+    'level'     => 'debug',
+    'via'       => \App\Logging\LokiNoFailureHandler::class,
+    'formatter_with' => [
+        'labels' => env('LOKI_LABELS', ''),
+        'context' => [],
+        'systemName' => env('LOKI_SYSTEM_NAME', ''),
+        'extraPrefix' => env('LOKI_EXTRA_PREFIX', ''),
+        'contextPrefix' => env('LOKI_CONTEXT_PREFIX', '')
+    ],
+    'handler_with'   => [
+        'apiConfig'  => [
+            'entrypoint'  => env('LOKI_ENTRYPOINT', "http://localhost:3100"),
+            'context'     => [],
+            'labels'      => [],
+            'client_name' => '',
+            'auth' => [
+                'basic' => [
+                    env('LOKI_AUTH_BASIC_USER', ''),
+                    env('LOKI_AUTH_BASIC_PASSWORD', '')
+                ],
+            ]
+        ],
+    ],
+],
+```
+
 # Testing
 In order to test using the provided docker-compose file, you'll need an up-to-date docker/docker-compose installation
 You can start the Loki container by navigating to src/main/test/docker and running 
