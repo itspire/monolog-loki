@@ -95,7 +95,7 @@ monolog:
 ```php
 'loki' => [
     'driver'         => 'monolog',
-    'level'          => 'debug',
+    'level'          => env('LOG_LEVEL', 'debug'),
     'handler'        => \Itspire\MonologLoki\Handler\LokiHandler::class,
     'formatter'      => \Itspire\MonologLoki\Formatter\LokiFormatter::class,
     'formatter_with' => [
@@ -152,7 +152,7 @@ class LokiNoFailureHandler
     {
         return new Logger('loki-no-failure', [
             new WhatFailureGroupHandler([
-                (new LokiHandler($config['handler_with']['apiConfig']))
+                (new LokiHandler($config['handler_with']['apiConfig'], $config['level']))
                     ->setFormatter(new LokiFormatter(...array_values($config['formatter_with'])))
             ])
         ]);
@@ -165,7 +165,7 @@ Update the config accordingly:
 ```php
 'loki' => [
     'driver'    => 'custom',
-    'level'     => 'debug',
+    'level'     => env('LOG_LEVEL', 'debug'),
     'via'       => \App\Logging\LokiNoFailureHandler::class,
     'formatter_with' => [
         'labels' => env('LOKI_LABELS', ''),
