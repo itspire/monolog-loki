@@ -129,7 +129,7 @@ class LokiFormatter extends NormalizerFormatter
 
     private function getMonologLabels(array $record): array
     {
-        $keepAsLabels = ['level_name', 'channel'];
+        $keepAsLabels = ['channel'];
 
         return array_filter(
             $record,
