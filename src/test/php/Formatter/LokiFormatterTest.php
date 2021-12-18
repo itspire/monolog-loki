@@ -245,11 +245,9 @@ class LokiFormatterTest extends TestCase
 
         $labels = $message['stream'];
         static::assertArrayHasKey('host', $labels);
-        static::assertArrayHasKey('level_name', $labels);
         static::assertArrayHasKey('channel', $labels);
 
         static::assertEquals($labels['host'], 'test');
-        static::assertEquals($labels['level_name'], $logRecord['level_name']);
         static::assertEquals($labels['channel'], $logRecord['channel']);
 
         $values = json_decode($message['values'][0][1], true);
