@@ -26,6 +26,7 @@ $handler = new WhatFailureGroupHandler(
                     // Set here your globally applicable labels
                 ],
                 'client_name' => 'your_host_name', // Here set a unique identifier for the client host
+                'is_sending_enabled' => true, // Whether the handler will actually send the logs to Loki (this option is useful for turning the sending off while running tests in CI so that it does not slow down tests)
                 // Optional : if you're using basic auth to authentify
                 'auth' => [
                     'basic' => ['user', 'password'],
@@ -62,6 +63,7 @@ The following options are not customizable in the configuration:
         labels:
           env: '%env(APP_ENV)%'
         client_name: my_app_server
+        is_sending_enabled: '%env(bool:IS_LOKI_LOGGING_ENABLED)%'
         auth:
           basic:
             user: username
@@ -111,6 +113,7 @@ monolog:
             'context'     => [],
             'labels'      => [],
             'client_name' => '',
+            'is_sending_enabled' => (bool) env('IS_LOKI_LOGGING_ENABLED', true),
             'auth' => [
                 'basic' => [
                     env('LOKI_AUTH_BASIC_USER', ''), 
@@ -179,6 +182,7 @@ Update the config accordingly:
             'context'     => [],
             'labels'      => [],
             'client_name' => '',
+            'is_sending_enabled' => (bool) env('IS_LOKI_LOGGING_ENABLED', true),
             'auth' => [
                 'basic' => [
                     env('LOKI_AUTH_BASIC_USER', ''),
