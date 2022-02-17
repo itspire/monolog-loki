@@ -36,6 +36,9 @@ class LokiHandler extends AbstractProcessingHandler
     /** custom curl options */
     protected array $customCurlOptions = [];
 
+    /** whether the record will be sent to the Loki system or not */
+    protected bool $isSendingEnabled;
+
     /** curl options which cannot be customized */
     protected array $nonCustomizableCurlOptions = [
         CURLOPT_CUSTOMREQUEST,
@@ -58,6 +61,7 @@ class LokiHandler extends AbstractProcessingHandler
         $this->globalLabels = $apiConfig['labels'] ?? [];
         $this->systemName = $apiConfig['client_name'] ?? null;
         $this->customCurlOptions = $this->determineValidCustomCurlOptions($apiConfig['curl_options'] ?? []);
+        $this->isSendingEnabled = $apiConfig['is_sending_enabled'] ?? true;
         if (isset($apiConfig['auth']['basic'])) {
             $this->basicAuth = (2 === count($apiConfig['auth']['basic'])) ? $apiConfig['auth']['basic'] : [];
         }
@@ -95,6 +99,15 @@ class LokiHandler extends AbstractProcessingHandler
         }
 
         $this->sendPacket(['streams' => $rows]);
+    }
+
+    public function isHandling(array $record): bool
+    {
+        if ($this->isSendingDisabled()) {
+            return false;
+        }
+
+        return parent::isHandling($record);
     }
 
     /** @throws \JsonException */
@@ -150,5 +163,10 @@ class LokiHandler extends AbstractProcessingHandler
     protected function write(array $record): void
     {
         $this->sendPacket(['streams' => [$record['formatted']]]);
+    }
+
+    private function isSendingDisabled(): bool
+    {
+        return false === $this->isSendingEnabled;
     }
 }
