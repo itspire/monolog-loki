@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2016 - 2020 Itspire.
+ * Copyright (c) 2016 - 2022 Itspire.
  * This software is licensed under the BSD-3-Clause license. (see LICENSE.md for full license)
  * All Right Reserved.
  */
@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace Itspire\MonologLoki\Formatter;
 
 use Monolog\Formatter\NormalizerFormatter;
+use Monolog\LogRecord;
 
 class LokiFormatter extends NormalizerFormatter
 {
@@ -42,55 +43,52 @@ class LokiFormatter extends NormalizerFormatter
         $this->contextPrefix = $contextPrefix;
     }
 
-    public function format(array $record): array
+    public function format(LogRecord $record): array
     {
-        $customLabels = $record['context']['labels'] ?? [];
-        unset($record['context']['labels']);
-        $record['context'] = array_merge($this->context, $record['context']);
-        $preparedRecord = $this->prepareRecord($record);
-        /** @var \DateTimeInterface $datetime */
-        $datetime = $record['datetime'];
+        $formattedRecord = parent::format($record);
+
+        $customLabels = $formattedRecord['context']['labels'] ?? [];
+        unset($formattedRecord['context']['labels']);
+        $formattedRecord['context'] = array_merge($this->context, $formattedRecord['context']);
+        $preparedRecord = $this->prepareRecord($formattedRecord);
 
         return [
             'stream' => array_merge($this->labels, $customLabels, $this->getMonologLabels($preparedRecord)),
             'values' => [
                 [
-                    (string) ($datetime->getTimestamp() * 1000000000),
+                    (string) ($record->datetime->getTimestamp() * 1000000000),
                     $this->toJson($this->normalize($preparedRecord)),
                 ],
             ],
         ];
     }
 
-    public function prepareRecord(array $record): array
+    /**
+     * @param array{
+     *     message: string,
+     *     context: mixed[],
+     *     level: int,
+     *     level_name: string,
+     *     channel: string,
+     *     datetime: \DateTimeImmutable,
+     *     extra: mixed[]
+     * } $formattedRecord
+     */
+    public function prepareRecord(array $formattedRecord): array
     {
-        if (!isset($record['datetime'], $record['message'], $record['level_name'])) {
-            $exceptionMessage = sprintf(
-                'The record should at least contain datetime, message and level_name keys, %s given',
-                var_export($record, true)
-            );
-
-            throw new \InvalidArgumentException($exceptionMessage);
-        }
-
-        // This is temporary until the next LTS version of Symfony is available in which monolog 2.* will be available
-        if ($record['datetime'] instanceof \DateTimeInterface) {
-            $record['datetime'] = $record['datetime']->format($this->dateFormat);
-        }
-
-        $preparedRecord = $record;
-        if (isset($record['context'])) {
+        $preparedRecord = $formattedRecord;
+        if (!empty($formattedRecord['context'])) {
             $preparedRecord = array_merge(
                 $preparedRecord,
-                $this->prepareRecordList($record['context'], $this->contextPrefix)
+                $this->prepareRecordList($formattedRecord['context'], $this->contextPrefix)
             );
             unset($preparedRecord['context']);
         }
 
-        if (isset($record['extra'])) {
+        if (!empty($formattedRecord['extra'])) {
             $preparedRecord = array_merge(
                 $preparedRecord,
-                $this->prepareRecordList($record['extra'], $this->extraPrefix, ['line', 'file'])
+                $this->prepareRecordList($formattedRecord['extra'], $this->extraPrefix, ['line', 'file'])
             );
             unset($preparedRecord['extra']);
         }
@@ -109,22 +107,20 @@ class LokiFormatter extends NormalizerFormatter
 
     private function prepareRecordList(array $list = [], string $prefixKey = '', array $fieldNotPrefixed = []): array
     {
-        $formattedList = parent::format($list);
-
-        foreach ($formattedList as $label => $value) {
+        foreach ($list as $label => $value) {
             $key = (in_array($label, $fieldNotPrefixed, true)) ? $label : $prefixKey . $label;
             $finalValue = $value;
 
-            $formattedList[$key] = (null !== $finalValue && !is_scalar($finalValue))
+            $list[$key] = (null !== $finalValue && !is_scalar($finalValue))
                 ? $this->toJson($finalValue)
                 : (string) $finalValue;
 
             if ($key !== $label) {
-                unset($formattedList[$label]);
+                unset($list[$label]);
             }
         }
 
-        return $formattedList;
+        return $list;
     }
 
     private function getMonologLabels(array $record): array

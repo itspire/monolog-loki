@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2016 - 2020 Itspire.
+  ~ This software is licensed under the BSD-3-Clause license. (see LICENSE.md for full license)
+  ~ All Right Reserved.
+  -->
+
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
+         backupGlobals="false" backupStaticAttributes="false" colors="true" convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true" convertWarningsToExceptions="true" processIsolation="false"
+         stopOnFailure="false" bootstrap="src/test/php/bootstrap.php">
+
+    <testsuites>
+        <testsuite name="Itspire Monolog Loki Test Suite">
+            <directory>src/test/php</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage>
+        <include>
+            <directory>src/main/php</directory>
+        </include>
+        <exclude>
+            <directory suffix="Interface.php">src/main/php</directory>
+            <directory>src/main/php/Annotation</directory>
+            <directory>src/main/php/Attribute</directory>
+            <directory>src/main/php/Resources</directory>
+            <file>src/main/php/ItspireFrameworkExtraBundle.php</file>
+            <directory>src/test/php</directory>
+        </exclude>
+        <report>
+            <html outputDirectory="build/coverage" lowUpperBound="35" highLowerBound="70" />
+            <text outputFile="php://stdout" showOnlySummary="true" />
+        </report>
+    </coverage>
+
+    <php>
+        <env name="SYMFONY_PHPUNIT_VERSION" value="9.5" />
+        <env name="LOKI_ENTRYPOINT" value="http://172.17.0.1:7000/" />
+        <ini name="date.timezone" value="UTC"/>
+    </php>
+</phpunit>

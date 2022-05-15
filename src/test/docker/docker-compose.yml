@@ -1,18 +1,13 @@
-############################################################
-# Copyright (c) 2016 - 2020 Itspire.
+#
+# Copyright (c) 2016 - 2022 Itspire.
 # This software is licensed under the BSD-3-Clause license. (see LICENSE.md for full license)
 # All rights reserved.
-############################################################
+#
 version: '3.8'
 
 services:
-  loki:
-    image: grafana/loki:latest
-    ports:
-      - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
-    networks:
-      - monolog-loki
-
-networks:
-  monolog-loki:
+    loki:
+        image: grafana/loki:2.5.0
+        ports:
+            - "7000:3100"
+        command: -config.file=/etc/loki/local-config.yaml

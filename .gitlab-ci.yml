@@ -1,33 +1,29 @@
-############################################################
+#
 # Copyright (c) 2016 - 2020 Itspire.
 # This software is licensed under the BSD-3-Clause license. (see LICENSE.md for full license)
 # All rights reserved.
-############################################################
+#
 variables:
-  source_dir: src/main/php
-  test_dir: src/test/php
-  build_dir: build
-  vendor_dir: vendor
-  bin_dir: $vendor_dir/bin
   PHP_IMAGE: $CI_REGISTRY/devops/docker-webservers/php-fpm-dev:latest
   COMPOSER_IMAGE: $CI_REGISTRY/itspire-devops/webservers/composer-ci:latest
-  PHPCS_ARGS: --report=full --report-checkstyle=$build_dir/logs/checkstyle.xml --standard=PSR12 --extensions=php --ignore=bootstrap.php $source_dir $test_dir
-  PHPCPD_ARGS: --log-pmd $build_dir/logs/pmd-cpd.xml $source_dir
-  PHPLOC_ARGS: --count-tests --log-xml=$build_dir/logs/phploc.xml --exclude=bootstrap.php $source_dir $test_dir
 
 default:
-  cache:
-    key: php7
-    paths:
-      - $build_dir
-      - $vendor_dir
-      - phpunit.xml
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
+  after_script:
+    - docker logout $CI_REGISTRY
   tags:
     - docker-build
 
+cache:
+  key: $CI_COMMIT_REF_NAME
+  paths:
+    - build
+    - vendor
+
 stages:
   - prepare
-  - dependencies
+  - deps
   - analyse
   - test
   - artifacts
@@ -35,41 +31,67 @@ stages:
 prepare:
   stage: prepare
   script:
-    - mkdir -p $build_dir/coverage $build_dir/logs
-    - rm -rf $build_dir/logs/*
-    - rm -rf $build_dir/coverage/*
-    - cp phpunit.xml.dist phpunit.xml
+    - mkdir -p build/coverage build/logs
+    - rm -rf build/logs/*
+    - rm -rf build/coverage/*
 
-dependencies:
-  stage: dependencies
-  before_script:
-    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
+deps:
+  stage: deps
   script:
-    - docker run --rm -v $(pwd):/project -w /project -e DEV_UID=$(id -u) -e DEV_GID=$(id -g) $COMPOSER_IMAGE install --prefer-dist
-    - docker run --rm -v $(pwd):/project -w /project -e DEV_UID=$(id -u) -e DEV_GID=$(id -g) $COMPOSER_IMAGE exec -vv -- simple-phpunit install
-  after_script:
-    - docker logout $CI_REGISTRY
+    - >
+      docker run \
+          --rm \
+          -v $(pwd):/project \
+          -w /project \
+          -e DEV_UID=$(id -u) \
+          -e DEV_GID=$(id -g) \
+          $COMPOSER_IMAGE install --prefer-dist
+    - >
+      docker run \
+          --rm \
+          -v $(pwd):/project \
+          -w /project \
+          -e DEV_UID=$(id -u) \
+          -e DEV_GID=$(id -g) \
+          $COMPOSER_IMAGE exec -vv -- simple-phpunit install
 
 analyse:
   stage: analyse
-  before_script:
-    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
   script:
-    - docker run --rm -v $(pwd):/project -w /project -e DEV_UID=$(id -u) -e DEV_GID=$(id -g) $PHP_IMAGE -l $source_dir $test_dir
-    - docker run --rm -v $(pwd):/project -w /project -e DEV_UID=$(id -u) -e DEV_GID=$(id -g) $PHP_IMAGE $bin_dir/phpcs $PHPCS_ARGS
-    - docker run --rm -v $(pwd):/project -w /project -e DEV_UID=$(id -u) -e DEV_GID=$(id -g) $PHP_IMAGE $bin_dir/phpcpd $PHPCPD_ARGS
-    - docker run --rm -v $(pwd):/project -w /project -e DEV_UID=$(id -u) -e DEV_GID=$(id -g) $PHP_IMAGE $bin_dir/phploc $PHPLOC_ARGS
-  after_script:
-    - docker logout $CI_REGISTRY
+    - >
+      docker run \
+          --rm \
+          -v $(pwd):/project \
+          -w /project \
+          -e DEV_UID=$(id -u) \
+          -e DEV_GID=$(id -g) \
+          $PHP_IMAGE -l src/main/php src/test/php
+    - >
+      docker run \
+          --rm \
+          -v $(pwd):/project \
+          -w /project \
+          -e DEV_UID=$(id -u) \
+          -e DEV_GID=$(id -g) \
+          $PHP_IMAGE vendor/bin/phpcs \
+              --report=full \
+              --report-checkstyle=build/logs/checkstyle.xml \
+              --standard=PSR12 \
+              --extensions=php \
+              --ignore=bootstrap.php \
+              src/main/php src/test/php
 
 test:
   stage: test
-  before_script:
-  - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
   script:
-    - docker run --rm -v $(pwd):/project -w /project -e DEV_UID=$(id -u) -e DEV_GID=$(id -g) $PHP_IMAGE $bin_dir/simple-phpunit --configuration /project/phpunit.xml
-  after_script:
-    - docker logout $CI_REGISTRY
+    - >
+      docker run \
+          --rm \
+          -v $(pwd):/project \
+          -w /project \
+          -e DEV_UID=$(id -u) \
+          -e DEV_GID=$(id -g) \
+          $PHP_IMAGE vendor/bin/simple-phpunit
 
 artifacts:
   stage: artifacts
@@ -77,4 +99,4 @@ artifacts:
     - echo "Generating artifacts..."
   artifacts:
     paths:
-      - $build_dir
+      - build

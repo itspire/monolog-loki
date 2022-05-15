@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (c) 2016 - 2020 Itspire.
+ * Copyright (c) 2016 - 2022 Itspire.
  * This software is licensed under the BSD-3-Clause license. (see LICENSE.md for full license)
  * All Right Reserved.
  */
@@ -14,7 +14,8 @@ use Itspire\MonologLoki\Formatter\LokiFormatter;
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Handler\Curl;
-use Monolog\Logger;
+use Monolog\Level;
+use Monolog\LogRecord;
 
 class LokiHandler extends AbstractProcessingHandler
 {
@@ -47,7 +48,7 @@ class LokiHandler extends AbstractProcessingHandler
     /** @return false|null|resource */
     private $connection;
 
-    public function __construct(array $apiConfig, $level = Logger::DEBUG, $bubble = true)
+    public function __construct(array $apiConfig, int|string|Level $level = Level::Debug, bool $bubble = true)
     {
         if (!function_exists('json_encode')) {
             throw new \RuntimeException('PHP\'s json extension is required to use Monolog\'s LokiHandler');
@@ -147,8 +148,8 @@ class LokiHandler extends AbstractProcessingHandler
     }
 
     /** @throws \JsonException */
-    protected function write(array $record): void
+    protected function write(LogRecord $record): void
     {
-        $this->sendPacket(['streams' => [$record['formatted']]]);
+        $this->sendPacket(['streams' => [$this->getFormatter()->format($record)]]);
     }
 }
