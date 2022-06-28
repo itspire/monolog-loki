@@ -45,7 +45,7 @@ class LokiHandler extends AbstractProcessingHandler
         CURLOPT_HTTPHEADER,
     ];
 
-    /** @return false|null|resource */
+    /** @var false|null|resource */
     private $connection;
 
     public function __construct(array $apiConfig, int|string|Level $level = Level::Debug, bool $bubble = true)
