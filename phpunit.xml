@@ -37,7 +37,7 @@
 
     <php>
         <env name="SYMFONY_PHPUNIT_VERSION" value="9.5" />
-        <env name="LOKI_ENTRYPOINT" value="http://172.17.0.1:7000/" />
+        <env name="LOKI_ENTRYPOINT" value="http://loki:3100/" />
         <ini name="date.timezone" value="UTC"/>
     </php>
 </phpunit>

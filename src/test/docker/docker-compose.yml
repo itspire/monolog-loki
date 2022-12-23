@@ -11,3 +11,7 @@ services:
         ports:
             - "7000:3100"
         command: -config.file=/etc/loki/local-config.yaml
+    workspace:
+        image: php:8.1
+        volumes:
+            - '../../..:/app'
