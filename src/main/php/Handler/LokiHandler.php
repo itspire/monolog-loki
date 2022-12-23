@@ -48,6 +48,9 @@ class LokiHandler extends AbstractProcessingHandler
     /** @return false|null|resource */
     private $connection;
 
+    /** @var string|null tenant id (HTTP header X-Scope-OrgID), if null -> no header */
+    protected ?string $tenantId = null;
+
     public function __construct(array $apiConfig, int|string|Level $level = Level::Debug, bool $bubble = true)
     {
         if (!function_exists('json_encode')) {
@@ -61,6 +64,9 @@ class LokiHandler extends AbstractProcessingHandler
         $this->customCurlOptions = $this->determineValidCustomCurlOptions($apiConfig['curl_options'] ?? []);
         if (isset($apiConfig['auth']['basic'])) {
             $this->basicAuth = (2 === count($apiConfig['auth']['basic'])) ? $apiConfig['auth']['basic'] : [];
+        }
+        if (isset($apiConfig['tenant_id'])) {
+            $this->tenantId = $apiConfig['tenant_id'];
         }
     }
 
@@ -130,6 +136,10 @@ class LokiHandler extends AbstractProcessingHandler
             if (!empty($this->basicAuth)) {
                 $curlOptions[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
                 $curlOptions[CURLOPT_USERPWD] = implode(':', $this->basicAuth);
+            }
+
+            if ($this->tenantId !== null) {
+                $curlOptions[CURLOPT_HTTPHEADER][] = 'X-Scope-OrgID: '.$this->tenantId;
             }
 
             curl_setopt_array($this->connection, $curlOptions);

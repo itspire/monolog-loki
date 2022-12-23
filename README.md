@@ -26,6 +26,8 @@ $handler = new WhatFailureGroupHandler(
                     // Set here your globally applicable labels
                 ],
                 'client_name' => 'your_host_name', // Here set a unique identifier for the client host
+                // Optional: Sets tenant id (HTTP header X-Scope-OrgID), if null or missing -> no header
+                'tenant_id' => 'some-tenant',
                 // Optional : if you're using basic auth to authentify
                 'auth' => [
                     'basic' => ['user', 'password'],
