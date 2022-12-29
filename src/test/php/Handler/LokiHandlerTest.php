@@ -42,6 +42,32 @@ class LokiHandlerTest extends TestCase
         }
     }
 
+    public function testHandleWithTenantId(): void
+    {
+        $record = $this->getRecord(Level::Warning, 'test', ['data' => new \stdClass(), 'foo' => 34]);
+
+        $handler = new LokiHandler(
+            [
+                'entrypoint' => getenv('LOKI_ENTRYPOINT'),
+                'context' => [],
+                'labels' => [],
+                'client_name' => 'test',
+                'tenant_id' => 'tenant-id-123',
+                'auth' => [
+                    'basic' => ['user', 'password'],
+                ],
+            ]
+        );
+
+        static::assertInstanceOf(expected: LokiHandler::class, actual: $handler);
+
+        try {
+            $handler->handle($record);
+        } catch (\RuntimeException) {
+            static::markTestSkipped('Could not connect to Loki server on ' . getenv('LOKI_ENTRYPOINT'));
+        }
+    }
+
     protected function getRecord(
         Level $level = Level::Warning,
         string $message = 'test',
