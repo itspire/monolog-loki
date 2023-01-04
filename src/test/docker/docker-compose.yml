@@ -13,5 +13,6 @@ services:
         command: -config.file=/etc/loki/local-config.yaml
     workspace:
         image: php:8.1
+        working_dir: /app
         volumes:
             - '../../..:/app'

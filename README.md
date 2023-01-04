@@ -193,31 +193,43 @@ Update the config accordingly:
 ```
 
 # Testing
+
 In order to test using the provided docker-compose file, you'll need an up-to-date docker/docker-compose installation
-You can start the Loki container by navigating to src/main/test/docker and running 
-```shell script
+You can start the Loki container by navigating to `src/test/docker` and running 
+```shell
 docker-compose up -d
 ```
 
 If you're testing from a local php installation, you'll need to retrieve the Loki container ip with :
-```shell script
+```shell
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' itspire-monolog-loki_loki_1
 ```
-and replace the ip in the LOKI_ENTRYPOINT definition in phpunit.xml : 
-```
+and replace the ip in the `LOKI_ENTRYPOINT` definition in `phpunit.xml`: 
+```xml
 <env name="LOKI_ENTRYPOINT" value="http://172.17.0.1:7000/" />
+```
+
+You can also run the test directly in the `workspace` docker container.
+First make sure `LOKI_ENTRYPOINT` in `phpunit.xml` looks like this:
+```xml
+<env name="LOKI_ENTRYPOINT" value="http://loki:3100/" />
+```
+
+Then you can run the following command to run `phpunit`:
+```shell
+docker-compose run workspace php ./vendor/bin/phpunit
 ```
 
 If you're testing from containerized php not in the default docker bridge network,  
 you'll need to start the container with an extra host named Loki mapped to your current host ip,  
 using the following option :
-```shell script
+```shell
 --add-host loki:{the_ip_of_your_host_in_your_network}
 ```
 
 Run the test using phpunit and you can verify that posting to Loki works
 by running the following from your host terminal : 
-```shell script
+```shell
 curl -G -s  "http://localhost:7000/loki/api/v1/query" --data-urlencode 'query={channel="test"}' | jq
 ```
 
