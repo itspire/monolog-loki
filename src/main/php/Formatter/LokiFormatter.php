@@ -56,7 +56,8 @@ class LokiFormatter extends NormalizerFormatter
             'stream' => array_merge($this->labels, $customLabels, $this->getMonologLabels($preparedRecord)),
             'values' => [
                 [
-                    (string) ($record->datetime->getTimestamp() * 1000000000),
+                    // use format() instead of getTimestamp() to get microsecond precision
+                    $record->datetime->format("Uu")."000",
                     $this->toJson($this->normalize($preparedRecord)),
                 ],
             ],
