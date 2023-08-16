@@ -105,7 +105,7 @@ class LokiHandler extends AbstractProcessingHandler
     }
 
     /** @throws \JsonException */
-    private function sendPacket(array $packet): void
+    protected function sendPacket(array $packet): void
     {
         $payload = json_encode($packet, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $url = sprintf('%s/loki/api/v1/push', $this->entrypoint);
