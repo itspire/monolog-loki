@@ -4,8 +4,8 @@
 # All rights reserved.
 #
 variables:
-  PHP_IMAGE: $CI_REGISTRY/devops/docker-webservers/php-fpm-dev:latest
-  COMPOSER_IMAGE: $CI_REGISTRY/itspire-devops/webservers/composer-ci:latest
+  PHP_IMAGE: $CI_REGISTRY/devops/docker-webservers/php-fpm-dev:4.1.1
+  COMPOSER_IMAGE: $CI_REGISTRY/itspire-devops/webservers/composer-ci:3.0.2
 
 default:
   before_script:

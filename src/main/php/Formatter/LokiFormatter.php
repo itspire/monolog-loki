@@ -57,7 +57,7 @@ class LokiFormatter extends NormalizerFormatter
             'values' => [
                 [
                     // use format() instead of getTimestamp() to get microsecond precision
-                    $record->datetime->format("Uu")."000",
+                    $record->datetime->format('Uu') . '000',
                     $this->toJson($this->normalize($preparedRecord)),
                 ],
             ],

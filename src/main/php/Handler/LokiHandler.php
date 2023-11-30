@@ -139,7 +139,7 @@ class LokiHandler extends AbstractProcessingHandler
             }
 
             if (null !== $this->tenantId) {
-                $curlOptions[CURLOPT_HTTPHEADER][] = 'X-Scope-OrgID: '.$this->tenantId;
+                $curlOptions[CURLOPT_HTTPHEADER][] = 'X-Scope-OrgID: ' . $this->tenantId;
             }
 
             curl_setopt_array($this->connection, $curlOptions);
