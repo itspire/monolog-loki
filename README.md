@@ -169,7 +169,7 @@ Update the config accordingly:
     'level'     => env('LOG_LEVEL', 'debug'),
     'via'       => \App\Logging\LokiNoFailureHandler::class,
     'formatter_with' => [
-        'labels' => env('LOKI_LABELS', ''),
+        'labels' => env('LOKI_LABELS', []),
         'context' => [],
         'systemName' => env('LOKI_SYSTEM_NAME', ''),
         'extraPrefix' => env('LOKI_EXTRA_PREFIX', ''),
