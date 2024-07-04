@@ -164,21 +164,15 @@ class LokiNoFailureHandler
 Update the config accordingly:
 
 ```php
+parse_str(env('LOKI_LABELS', ''), $loki_formatter_labels);
+
 'loki' => [
     'driver'    => 'custom',
     'level'     => env('LOG_LEVEL', 'debug'),
     'via'       => \App\Logging\LokiNoFailureHandler::class,
     'formatter_with' => [
-        // LOKI_LABELS: app,laravel|env,prod
-        'labels' => env('LOKI_LABELS', '') ? array_reduce(
-            explode('|', env('LOKI_LABELS', '')),
-                function ($carry, $item) {
-                    list($key, $value) = explode(',', $item);
-                    $carry[$key] = $value;
-                    return $carry;
-                },
-                []
-            ) : [],
+        // LOKI_LABELS: app=laravel&env=prod
+        'labels' => $loki_formatter_labels,
         'context' => [],
         'systemName' => env('LOKI_SYSTEM_NAME', ''),
         'extraPrefix' => env('LOKI_EXTRA_PREFIX', ''),
