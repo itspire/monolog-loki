@@ -72,7 +72,7 @@ The following options are not customizable in the configuration:
           !php/const CURLOPT_CONNECTTIMEOUT_MS: 500,
           !php/const CURLOPT_TIMEOUT_MS: 600
 ```
-Note : 
+Note :
 We're currently working on a possible bundle based implementation for Symfony but at the moment, this is the way.
 
 
@@ -115,7 +115,7 @@ monolog:
             'client_name' => '',
             'auth' => [
                 'basic' => [
-                    env('LOKI_AUTH_BASIC_USER', ''), 
+                    env('LOKI_AUTH_BASIC_USER', ''),
                     env('LOKI_AUTH_BASIC_PASSWORD', '')
                 ],
             ],
@@ -136,7 +136,7 @@ LOKI_EXTRA_PREFIX=
 These vars can be injected by Kubernetes, Docker or simply by setting them on the .env file
 
 ### Laravel with WhatFailureGroupHandler
-Since Loki log handling uses a remote server, logging is prone to be subject of timeout, network shortage and so on. To avoid your application being broken in such a case, we recommend wrapping the handler in a WhatFailureGroupHandler. 
+Since Loki log handling uses a remote server, logging is prone to be subject of timeout, network shortage and so on. To avoid your application being broken in such a case, we recommend wrapping the handler in a WhatFailureGroupHandler.
 
 Create a custom Log handler and wrap the `LokiHandler` with a `WhatFailureGroupHandler`.
 ```php
@@ -161,7 +161,7 @@ class LokiNoFailureHandler
 }
 
 ```
-Update the config accordingly: 
+Update the config accordingly:
 
 ```php
 'loki' => [
@@ -169,7 +169,16 @@ Update the config accordingly:
     'level'     => env('LOG_LEVEL', 'debug'),
     'via'       => \App\Logging\LokiNoFailureHandler::class,
     'formatter_with' => [
-        'labels' => env('LOKI_LABELS', ''),
+        // LOKI_LABELS: app,laravel|env,prod
+        'labels' => env('LOKI_LABELS', '') ? array_reduce(
+            explode('|', env('LOKI_LABELS', '')),
+                function ($carry, $item) {
+                    list($key, $value) = explode(',', $item);
+                    $carry[$key] = $value;
+                    return $carry;
+                },
+                []
+            ) : [],
         'context' => [],
         'systemName' => env('LOKI_SYSTEM_NAME', ''),
         'extraPrefix' => env('LOKI_EXTRA_PREFIX', ''),
@@ -194,7 +203,7 @@ Update the config accordingly:
 
 # Testing
 In order to test using the provided docker-compose file, you'll need an up-to-date docker/docker-compose installation
-You can start the Loki container by navigating to src/main/test/docker and running 
+You can start the Loki container by navigating to src/main/test/docker and running
 ```shell script
 docker-compose up -d
 ```
@@ -203,25 +212,25 @@ If you're testing from a local php installation, you'll need to retrieve the Lok
 ```shell script
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' itspire-monolog-loki_loki_1
 ```
-and replace the ip in the LOKI_ENTRYPOINT definition in phpunit.xml : 
+and replace the ip in the LOKI_ENTRYPOINT definition in phpunit.xml :
 ```
 <env name="LOKI_ENTRYPOINT" value="http://172.17.0.1:7000/" />
 ```
 
-If you're testing from containerized php not in the default docker bridge network,  
-you'll need to start the container with an extra host named Loki mapped to your current host ip,  
+If you're testing from containerized php not in the default docker bridge network,
+you'll need to start the container with an extra host named Loki mapped to your current host ip,
 using the following option :
 ```shell script
 --add-host loki:{the_ip_of_your_host_in_your_network}
 ```
 
 Run the test using phpunit and you can verify that posting to Loki works
-by running the following from your host terminal : 
+by running the following from your host terminal :
 ```shell script
 curl -G -s  "http://localhost:7000/loki/api/v1/query" --data-urlencode 'query={channel="test"}' | jq
 ```
 
-For each time you ran the tests, you should see a log entry looking like the following : 
+For each time you ran the tests, you should see a log entry looking like the following :
 ```json
 {
     "stream": {
